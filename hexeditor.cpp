@@ -5,8 +5,8 @@
 //* Конструктор класса
 //********************************************************************
 hexeditor::hexeditor(char* data, uint32_t len, QMenuBar* mbar, QStatusBar* sbar, QWidget* parent) : QWidget(parent) {
-  
-int fontsize;  
+
+int fontsize;
 
 // локальные копии указателей на элементы главного окна
 menubar=mbar;
@@ -24,7 +24,7 @@ if (fontsize>6) {
   font=dhex->font();
   font.setPointSize(fontsize);
   dhex->setFont(font);
-}  
+}
 
 // Настройка внешнего вида редактора
 dhex->setAddressWidth(6);
@@ -84,20 +84,20 @@ switch(bpl) {
   case 32:
     w32->setChecked(true);
     break;
-    
+
   case 64:
     w64->setChecked(true);
     break;
-    
+
   case 48:
     w48->setChecked(true);
     break;
-    
+
   default:
     w16->setChecked(true);
     bpl=16;
     break;
-}    
+}
 dhex->setBytesPerLine(bpl);
 menu_edit->addMenu(hwidth);
 
@@ -107,10 +107,10 @@ menu_ro->setChecked(true);
 
 // Инофрмация для статусбара
 roindicator=new QLabel("R/O",this);
-statusbar->addWidget(roindicator);  
+statusbar->addWidget(roindicator);
 
 status_adr_info=new QLabel(this);
-statusbar->addWidget(status_adr_info);  
+statusbar->addWidget(status_adr_info);
 
 // Сигналы и слоты
 connect(wsel,SIGNAL(triggered(QAction*)),this,SLOT(WidthSelector(QAction*)));
@@ -123,17 +123,17 @@ connect(dhex,SIGNAL(dataChanged()),this,SLOT(dchook()));
 //********************************************************************
 hexeditor::~hexeditor() {
 
-statusbar->removeWidget(status_adr_info);  
-statusbar->removeWidget(roindicator);  
+statusbar->removeWidget(status_adr_info);
+statusbar->removeWidget(roindicator);
 
-delete menu_edit;  
+delete menu_edit;
 }
 
 //********************************************************************
 //* Выбор ширины редактора
 //********************************************************************
 void hexeditor::WidthSelector(QAction* sel) {
-  
+
 if (sel == w16)  bpl=16;
 else if (sel == w32) bpl=32;
 else if (sel == w48) bpl=48;
@@ -147,7 +147,7 @@ hconfig->setValue("/config/bpl",bpl);
 
 
 //********************************************************************
-//*  Вывод текущего адреса в статусбар 
+//*  Вывод текущего адреса в статусбар
 //********************************************************************
 void hexeditor::ShowAddres(qint64 adr) {
 
@@ -156,10 +156,10 @@ QByteArray data;
 
 data=dhex->dataAt(adr,1);
 
-adrstr.sprintf("Position:% 06llX Byte:% 02X",adr,(uint8_t)data.at(0));
-status_adr_info->setText(adrstr);   
+adrstr.sprintf("Position:%06llX Byte:%02X",adr,(uint8_t)data.at(0));
+status_adr_info->setText(adrstr);
 }
-    
+
 //********************************************************************
 //* Увеличение размера шрифта
 //********************************************************************
@@ -169,13 +169,13 @@ void hexeditor::EnlargeFont() {ChangeFont(1); }
 //* Уменьшение размера шрифта
 //********************************************************************
 void hexeditor::ReduceFont() { ChangeFont(-1); }
-   
+
 //********************************************************************
 //* Изменение размера шрифта
 //********************************************************************
 void hexeditor::ChangeFont(int delta) {
-  
-int fsize;  
+
+int fsize;
 
 font=dhex->font();
 fsize=font.pointSize();
@@ -191,15 +191,15 @@ dhex->repaint(0,0,-1,-1);
 hconfig->setValue("/config/hexfontsize",fsize);
 
 }
-   
+
 //********************************************************************
 //*  Переключатель чтения-записи
 //********************************************************************
 void hexeditor::ROswitch() {
-  
-readonly=menu_ro->isChecked(); 
+
+readonly=menu_ro->isChecked();
 if (readonly) roindicator->setText("R/O");
 else roindicator->setText("R/W");
-dhex->setReadOnly(readonly);  
+dhex->setReadOnly(readonly);
 dhex->ensureVisible();
 }

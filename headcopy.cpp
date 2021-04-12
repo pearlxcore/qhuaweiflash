@@ -1,6 +1,6 @@
-// 
+//
 //  Копирование заголовков разделов
-// 
+//
 #include <QtWidgets>
 
 #include <stdio.h>
@@ -14,11 +14,12 @@
 //**************************************************
 void head_copy() {
 
-uint32_t i,res;  
+int i;
+uint32_t res;
 char str[100];
 int src,dst;
 
-QDialog* qd=new QDialog;  
+QDialog* qd=new QDialog;
 QGridLayout* lm=new QGridLayout(qd);
 
 QFont font;
@@ -59,8 +60,8 @@ for(i=0;i<ptable->index();i++) {
   sprintf(str,"%02i %s",i,ptable->name(i));
   to->insertItem(i+1,str);
 }
-from->setCurrentIndex(0); 
-to->setCurrentIndex(0); 
+from->setCurrentIndex(0);
+to->setCurrentIndex(0);
 
 res=qd->exec();
 
@@ -77,4 +78,4 @@ for(i=0;i<ptable->index();i++) {
     memcpy(ptable->hptr(i),ptable->hptr(src),sizeof(struct pheader));
   }
 }
-}  
+}

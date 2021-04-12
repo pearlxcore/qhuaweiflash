@@ -25,11 +25,11 @@ struct  pcl{
   char name[20];
   uint32_t code;
   enum parttypes type;
-} pcodes[]={ 
-//  --- имя ---       Part ID     тип    
-  {"M3Boot",          0x20000    ,part_bin}, 
-  {"Ptable"          ,0x10000    ,part_ptable}, 
-  {"M3Boot_R11"      ,0x200000   ,part_bin}, 
+} pcodes[]={
+//  --- имя ---       Part ID     тип
+  {"M3Boot",          0x20000    ,part_bin},
+  {"Ptable"          ,0x10000    ,part_ptable},
+  {"M3Boot_R11"      ,0x200000   ,part_bin},
   {"Ptable_ext_A"    ,0x480000   ,part_ptable},
   {"Ptable_ext_B"    ,0x490000   ,part_ptable},
   {"Fastboot"        ,0x110000   ,part_bin},
@@ -48,9 +48,9 @@ struct  pcl{
   {"Nvimg"           ,0x80000    ,part_nvram},
   {"System"          ,0x590000   ,part_cpio},
   {"System"          ,0x100000   ,part_cpio},
-  {"APP"             ,0x570000   ,part_cpio}, 
-  {"APP"             ,0x5a0000   ,part_cpio}, 
-  {"APP_EXT_A"       ,0x450000   ,part_cpio}, 
+  {"APP"             ,0x570000   ,part_cpio},
+  {"APP"             ,0x5a0000   ,part_cpio},
+  {"APP_EXT_A"       ,0x450000   ,part_cpio},
   {"APP_EXT_B"       ,0x460000   ,part_cpio},
   {"CDROMISO"        ,0xb0000    ,part_iso},
   {"Oeminfo"         ,0xa0000    ,part_oem},
@@ -78,22 +78,22 @@ struct  pcl{
   {"HIFI_R11"        ,0x280000   ,part_bin},
   {"Firmwares"       ,0x1e0000   ,part_bin},
   {"Teeos"	     ,0x290000   ,part_bin},
-  {0,0}
+  {""                ,0          ,part_bin /* DUMMY END */}
 };
 
 for(j=0;pcodes[j].code != 0;j++) {
   if(pcodes[j].code == id) {
     break;
-  }  
+  }
 }
-if (pcodes[j].code != 0) { 
+if (pcodes[j].code != 0) {
     strcpy((char*)pname,pcodes[j].name); // имя найдено - копируем его в структуру
     *ptype=pcodes[j].type;
-}    
+}
 else {
     sprintf((char*)pname,"U%08x",id); // имя не найдено - подставляем псевдоимя Uxxxxxxxx в тупоконечном формате
     *ptype=part_bin;
-}    
+}
 }
 
 
@@ -102,7 +102,7 @@ else {
 //* Получение описания типа прошивки по коду
 //****************************************************
 char* fw_description(uint8_t code) {
-  
+
 // таблица типов подписей
 char* fwtypes[]={
 "00-UNKNOWN",        // 0
@@ -113,9 +113,9 @@ char* fwtypes[]={
 "05-FW_WEBUI",       // 5
 "06-ISO_WEBUI",      // 6
 "07-FW_ISO_WEBUI"    // 7
-};  
+};
 
-return fwtypes[code&0x7];  
+return fwtypes[code&0x7];
 }
 
 //*******************************************************************
@@ -137,7 +137,7 @@ int res;
 // читаем заголовок в структуру
 fread(&table[npart].hd,1,sizeof(pheader),in); // заголовок
 
-//  Ищем символическое имя раздела по таблице 
+//  Ищем символическое имя раздела по таблице
 find_pname(code(npart),table[npart].pname,&table[npart].ptype);
 
 // загружаем блок контрольных сумм
@@ -155,37 +155,37 @@ hcrc=table[npart].hd.crc;
 table[npart].hd.crc=0;  // старая CRC в рассчете не учитывается
 crc=crc16((uint8_t*)&table[npart].hd,sizeof(pheader));
 if (crc != hcrc) {
-    str.sprintf("Section% s (% 02x) - Header checksum error",table[npart].pname,code(npart)>>16);
+    str.sprintf("Section%s (%02x) - Header checksum error",table[npart].pname,code(npart)>>16);
     QMessageBox::warning(0,"Erreur CRC",str);
-}  
+}
 table[npart].hd.crc=crc;  // восстанавливаем CRC
 
 // вычисляем и проверяем CRC раздела
 calc_crc16(npart);
 if (crcblocksize != crcsize(npart)) {
-    str.sprintf("Section% s (% 02x) - Invalid checksum block size",table[npart].pname,code(npart)>>16);
+    str.sprintf("Section%s (%02x) - Invalid checksum block size",table[npart].pname,code(npart)>>16);
     QMessageBox::warning(0,"Erreur CRC",str);
-}  
-  
+}
+
 else if (memcmp(crcblock,table[npart].csumblock,crcblocksize) != 0) {
-    str.sprintf("Section% s (% 02x) - Invalid Block Checksum",table[npart].pname,code(npart)>>16);
+    str.sprintf("Section%s (%02x) - Invalid Block Checksum",table[npart].pname,code(npart)>>16);
     QMessageBox::warning(0,"Erreur CRC",str);
-}  
-  
+}
+
 free(crcblock);
 
 // Определение zlib-сжатия
 
-table[npart].zflag=0; 
+table[npart].zflag=0;
 
 if ((*(uint16_t*)table[npart].pimage) == 0xda78) {
-  table[npart].zflag=table[npart].hd.psize;  // сохраняем сжатый размер 
+  table[npart].zflag=table[npart].hd.psize;  // сохраняем сжатый размер
   zlen=52428800;
   zbuf=(uint8_t*)malloc(zlen);  // буфер в 50М
   // распаковываем образ раздела
   res=uncompress (zbuf, &zlen, table[npart].pimage, table[npart].hd.psize);
   if (res != Z_OK) {
-    printf("\nError decompressing partition% s (% 02x) \n",table[npart].pname,table[npart].hd.code>>16);
+    printf("\nError decompressing partition%s (%02x) \n",table[npart].pname,table[npart].hd.code>>16);
     exit(0);
   }
   // создаем новый буфер образа раздела и копируем в него рапаковынные данные
@@ -222,13 +222,13 @@ npart=0;
 
 //*******************************************************
 //*  Поиск разделов в файле прошивки
-//* 
+//*
 //* возвращает число найденных разделов
 //*******************************************************
 void ptable_list::findparts(FILE* in) {
 
 
-const unsigned int dpattern=0xa55aaa55; // Маркер начала заголовка раздела   
+const unsigned int dpattern=0xa55aaa55; // Маркер начала заголовка раздела
 unsigned int i;
 uint8_t percent,oldpercent=0;
 uint32_t filesize;
@@ -267,20 +267,20 @@ while (fread(&i,1,4,in) == 4) {
    fbar->setValue(percent);
    QCoreApplication::processEvents();
    oldpercent=percent;
-  } 
+  }
 
   if (i == dpattern) break; // найден маркер
 }
 if (feof(in)) {
   QMessageBox::critical(0, "Error", "No partition found in the file - the file does not contain a firmware image");
     exit(0);
-}  
+}
 
 // текущая позиция в файле должна быть не ближе 0x60 от начала - размер заголовка всего файла
 if (ftell(in)<0x60) {
     QMessageBox::critical(0, "Error", "The size of the file header is incorrect");
     exit(0);
-}    
+}
 fseek(in,-0x60,SEEK_CUR); // отъезжаем на начало BIN-файла
 // вынимаем префикс
 fread(prefix,0x5c,1,in);
@@ -290,11 +290,11 @@ if (dload_id == -1) {
   // если принудительно dload_id не установлен - выбираем его из заголовка
   if (dload_id > 0xf) {
 	  QMessageBox::critical(0, "Error", "Invalid firmware type code (dload_id) in the title");
-	  printf("\ n Invalid firmware type code (dload_id) in the header -% x", dload_id);
+	  printf("\n Invalid firmware type code (dload_id) in the header -%x", dload_id);
     exit(0);
   }
   dload_id&=7; // удаляем бит наличия подписи
-  printf("\ n Firmware file code:% x (% s)",dload_id,fw_description(dload_id));
+  printf("\n Firmware file code:%x (%s)",dload_id,fw_description(dload_id));
 }
 
 // Поиск разделов
@@ -305,7 +305,7 @@ do {
    fbar->setValue(percent);
    QCoreApplication::processEvents();
    oldpercent=percent;
-  } 
+  }
   if (fread(&i,1,4,in) != 4) break; // конец файла
   if (i != dpattern) break;         // образец не найден - конец цепочки разделов
   fseek(in,-4,SEEK_CUR);            // отъезжаем назад, на начало заголовка
@@ -315,11 +315,11 @@ do {
 delete fbar;
 delete lm;
 delete label;
-delete pb;  
+delete pb;
 }
 
 //*******************************************************
-//*  Замена образа раздела на содержимое файла 
+//*  Замена образа раздела на содержимое файла
 //*******************************************************
 void ptable_list::loadimage(int np, FILE* in) {
 
@@ -350,9 +350,9 @@ set_modified();
 //* Запись полного образа раздела в файл
 //*******************************************************
 void ptable_list::save_part(int np,FILE* out,bool zflag) {
- 
+
 uint32_t pos,i,cnt;
-uint8_t pad=0;  
+uint8_t pad=0;
 long unsigned int clen;
 
 
@@ -361,10 +361,10 @@ if (zflag) {
   // сжатие образа раздела
   table[np].pimage=(uint8_t*)malloc(table[np].hd.psize+64000);
   clen=table[np].hd.psize+64000;
-  compress2(table[np].pimage,&clen,origpt.pimage,origpt.hd.psize,9); 
+  compress2(table[np].pimage,&clen,origpt.pimage,origpt.hd.psize,9);
   table[np].hd.psize=clen;
   calc_crc16(np);
-}  
+}
 fwrite(hptr(np),1,sizeof(pheader),out);   // заголовок
 fwrite(table[np].csumblock,1,crcsize(np),out);  // crc
 fwrite(iptr(np),1,psize(np),out);   // тело
@@ -373,7 +373,7 @@ pos=ftell(out);
 if ((pos&3) != 0) {
   cnt=4-(pos%4); // получаем число лишних байт;
   for(i=0;i<cnt;i++) fwrite(&pad,1,1,out);  // записываем нули до границы слова
-}  
+}
 if (zflag) {
   // чистим буфера
   free(table[np].pimage);
@@ -381,25 +381,25 @@ if (zflag) {
   table[np]=origpt;
   table[np].csumblock=0;
   calc_crc16(np);
-}  
+}
 
 }
 
 //*******************************************************
 //*  Вычисление блочной контрольной суммы заголовка
 //*******************************************************
-void ptable_list::calc_hd_crc16(int n) { 
+void ptable_list::calc_hd_crc16(int n) {
 
-table[n].hd.crc=0;   
-table[n].hd.crc=crc16((uint8_t*)hptr(n),sizeof(pheader));   
+table[n].hd.crc=0;
+table[n].hd.crc=crc16((uint8_t*)hptr(n),sizeof(pheader));
 }
 
 
 //*******************************************************
-//*  Вычисление блочной контрольной суммы раздела 
+//*  Вычисление блочной контрольной суммы раздела
 //*******************************************************
 void ptable_list::calc_crc16(int n) {
-  
+
 uint32_t csize; // размер блока сумм в 16-битных словах
 uint16_t* csblock;  // указатель на создаваемый блок
 uint32_t off,len;
@@ -413,21 +413,21 @@ csblock=(uint16_t*)malloc(csize*2);
 
 // цикл вычисления сумм
 for (i=0;i<csize;i++) {
- off=i*blocksize; // смещение до текущего блока 
+ off=i*blocksize; // смещение до текущего блока
  len=blocksize;
- if ((psize(n)-off)<blocksize) len=psize(n)-off; // для последнего неполного блока 
+ if ((psize(n)-off)<blocksize) len=psize(n)-off; // для последнего неполного блока
  csblock[i]=crc16(iptr(n)+off,len);
-} 
+}
 // вписываем параметры в заголовок
 if (table[n].csumblock != 0) free(table[n].csumblock); // уничтожаем старый блок, если он был
 table[n].csumblock=csblock;
 table[n].hd.hdsize=csize*2+sizeof(pheader);
 // перевычисляем CRC заголовка
 calc_hd_crc16(n);
-  
+
 }
 
-  
+
 //*******************************************************
 //* Удаление раздела
 //*******************************************************
@@ -443,8 +443,8 @@ for (i=n;i<index()-1;i++)  table[i]=table[i+1];
 npart--;
 // устанавливаем признак модификации данных
 set_modified();
-}  
-  
+}
+
 
 //*******************************************************
 //* Перемещение раздела вверх
@@ -489,6 +489,3 @@ calc_crc16(n);
 // устанавливаем признак модификации данных
 set_modified();
 }
-
-
-

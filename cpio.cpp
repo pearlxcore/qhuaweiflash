@@ -1,6 +1,6 @@
-// 
+//
 //  Редактор cpio-разделов
-// 
+//
 #include <QtCore/QVariant>
 #include <QtWidgets>
 
@@ -23,7 +23,7 @@ cpioedit::cpioedit (int xpnum,QMenuBar* mbar, QWidget* parent) : QWidget(parent)
 int res;
 char filename[512];
 
-menubar=mbar;  
+menubar=mbar;
 pnum=xpnum;
 // образ раздела
 pdata=ptable->iptr(pnum);
@@ -76,10 +76,10 @@ while(iptr < (pdata+plen)) {
    if (iptr >= (pdata+plen)) {
 	   QMessageBox::critical(0, "CPIO error", "The trailer speed limiter was not detected !!!");
 	   goto ldone;
-   }  
+   }
    if (is_cpio(iptr)) break; // нашли сигнатуру
    iptr++; // ищем ее дальше
-  }  
+  }
  extract_filename(iptr,filename);
  if (strncmp(filename,"TRAILER!!!",10) == 0) break;
  res=cpio_load_file(iptr,rootdir,plen,filename);
@@ -99,15 +99,15 @@ cpioedit::~cpioedit () {
 
 QMessageBox::StandardButton reply;
 
-// Проверяем, не изменлось ли что-нибудь внутри  
+// Проверяем, не изменлось ли что-нибудь внутри
 if (is_modified) {
 	reply = QMessageBox::warning(this, "Section record", "The content section changed, save?", QMessageBox::Ok | QMessageBox::Cancel);
 	if (reply == QMessageBox::Ok) repack_cpio();
-}  
+}
 // удаляем элементы корневого каталога
 qDeleteAll(*rootdir);
 // очищаем корневой каталог
-rootdir->clear();  
+rootdir->clear();
 // удаляем корневой каталог
 delete rootdir;
 
@@ -121,7 +121,7 @@ delete menu_edit;
 //* Открытие тулбара и меню
 //*********************************************************************
 void cpioedit::menuenabler() {
-  
+
 toolbar->setEnabled(true);
 menu_edit->setEnabled(true);
 // разъединяем этот слот - он уже отработал и далее не нужен
@@ -132,7 +132,7 @@ disconnect(cpiotable,0,this,SLOT(menuenabler()));
 //* Сохранение изменений
 //*********************************************************************
 void cpioedit::saveall() {
-  
+
 repack_cpio();
 is_modified=false;
 }
@@ -146,8 +146,8 @@ void cpioedit::cpio_show_dir(QList<cpfiledir*>* dir, int focusmode) {
 
 QTableWidgetItem* item;
 QString str;
-QStringList(plst);
-QStringList(hlist);
+QStringList plst;
+QStringList hlist;
 
 int i,j;
 time_t ctime;
@@ -158,36 +158,36 @@ int showsize;
 
 cpiotable=new QTableWidget(0,7,this);
 
-plst <<"idx" << "Name" << "size" << "Date" << "Mode" << "GID" << "UID"; 
+plst <<"idx" << "Name" << "size" << "Date" << "Mode" << "GID" << "UID";
 cpiotable->setHorizontalHeaderLabels(plst);
 
 currentdir=dir;
 
 cpiotable->setRowCount(dir->count()); //cpiotable->rowCount()+1);
 for (i=0;i<dir->count();i++) {
-  hlist <<""; 
+  hlist <<"";
   // индекс файла в векторе
   str.sprintf("%i",i);
   item=new QTableWidgetItem(str);
   item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsUserCheckable|Qt::ItemIsEnabled);
   item->setForeground(QBrush(Qt::black));
   cpiotable->setItem(i,0,item);
-  
+
   // имя файла
   str=dir->at(i)->cfname();
   item=new QTableWidgetItem(str);
   // Выбор иконки файла
   showsize=0;
-  if (i == 0) item->setIcon(QIcon(QApplication::style()->standardIcon(QStyle::SP_ArrowBack))); 
-  else if (dir->at(i)->subdir != 0) item->setIcon(QIcon(QApplication::style()->standardIcon(QStyle::SP_DirIcon))); 
+  if (i == 0) item->setIcon(QIcon(QApplication::style()->standardIcon(QStyle::SP_ArrowBack)));
+  else if (dir->at(i)->subdir != 0) item->setIcon(QIcon(QApplication::style()->standardIcon(QStyle::SP_DirIcon)));
   else if (((dir->at(i)->fmode())&C_ISLNK) == C_ISLNK) {
     // симлмнк
     item->setIcon(QIcon(QApplication::style()->standardIcon(QStyle::SP_FileLinkIcon)));
     // добавляем к имени симлинка ссылку на имя файла
     str.append(" -> ");
-    str.append(dir->at(i)->fdata()); 
+    str.append(dir->at(i)->fdata());
     item->setText(str);
-  }  
+  }
   else  {
     // выполняемые файлы
     if ((((dir->at(i)->fmode())&C_IXUSR) != 0)) item->setIcon(QIcon(QApplication::style()->standardIcon(QStyle::SP_ComputerIcon)));
@@ -195,7 +195,7 @@ for (i=0;i<dir->count();i++) {
     else item->setIcon(QIcon(QApplication::style()->standardIcon(QStyle::SP_FileIcon)));
     // разрешить показ размера
     showsize=1;
-  }  
+  }
   item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsUserCheckable|Qt::ItemIsEnabled);
   cpiotable->setItem(i,1,item);
   if (i == 0) continue;
@@ -207,8 +207,8 @@ for (i=0;i<dir->count();i++) {
    item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsUserCheckable|Qt::ItemIsEnabled);
    item->setForeground(QBrush(Qt::blue));
    cpiotable->setItem(i,2,item);
-  } 
-  
+  }
+
   // дата-время
   ctime=dir->at(i)->ftime();
   strftime(tstr,100,"%d-%b-%y  %H:%M",localtime(&ctime));
@@ -217,26 +217,26 @@ for (i=0;i<dir->count();i++) {
   item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsUserCheckable|Qt::ItemIsEnabled);
   item->setForeground(QBrush(Qt::black));
   cpiotable->setItem(i,3,item);
-  
+
   // атрибуты доступа
   fm=dir->at(i)->fmode();
   strcpy(modestr,"rwxrwxrwx");
   for (j=0;j<9;j++) {
     if (((fm>>j)&1) == 0) modestr[8-j]='-';
-  }  
+  }
   str=modestr;
   item=new QTableWidgetItem(str);
   item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsUserCheckable|Qt::ItemIsEnabled);
   item->setForeground(QBrush(Qt::red));
   cpiotable->setItem(i,4,item);
-  
+
   // gid
   str.sprintf("%i",dir->at(i)->fgid());
   item=new QTableWidgetItem(str);
   item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsUserCheckable|Qt::ItemIsEnabled);
   item->setForeground(QBrush(Qt::black));
   cpiotable->setItem(i,5,item);
-  
+
   // uid
   str.sprintf("%i",dir->at(i)->fuid());
   item=new QTableWidgetItem(str);
@@ -244,30 +244,30 @@ for (i=0;i<dir->count();i++) {
   item->setForeground(QBrush(Qt::black));
   cpiotable->setItem(i,6,item);
 
-} 
+}
   //------------------------------------
 //   cpiotable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-  
+
   // прячем индексы файлов
   cpiotable->setColumnHidden(0,true);
-  
+
   // прячем вертикальные заголовки
   cpiotable->setVerticalHeaderLabels(hlist);
 
-  
+
   cpiotable->resizeColumnsToContents();
   cpiotable->setShowGrid(false);
   cpiotable->setColumnWidth(1, 250);
   cpiotable->setColumnWidth(2, 100);
 
   cpiotable->sortByColumn(1,Qt::AscendingOrder);
-  
+
   // Сигнал выбора файла (enter или двойной клик)
   connect(cpiotable,SIGNAL(cellActivated(int,int)),SLOT(cpio_process_file(int,int)));
 //   connect(cpiotable,SIGNAL(cellDoubleClicked(int,int)),SLOT(cpio_process_file(int,int)));
 //   connect(cpiotable,SIGNAL(cellPressed(int,int)),SLOT(cpio_process_file(int,int)));
-  
+
   // Вводим таблицу в экранную форму
   vlm->addWidget(cpiotable);
   cpiotable->show();
@@ -281,8 +281,8 @@ for (i=0;i<dir->count();i++) {
   else {
     connect(cpiotable,SIGNAL(cellActivated(int,int)),this,SLOT(menuenabler()));
     connect(cpiotable,SIGNAL(cellClicked(int,int)),this,SLOT(menuenabler()));
-  }  
-    
+  }
+
 }
 
 //*********************************************************************
@@ -290,10 +290,10 @@ for (i=0;i<dir->count();i++) {
 //*********************************************************************
 void cpioedit::cpio_hide_dir() {
 
-disconnect(cpiotable,0,this,0);  
+disconnect(cpiotable,0,this,0);
 
 vlm->removeWidget(cpiotable);
-  
+
 delete cpiotable;
 cpiotable=0;
 }
@@ -325,7 +325,7 @@ return currentdir->at(current_file_index());
 //* Удаление файла
 //*********************************************************************
 void cpioedit::delete_file() {
-  
+
 int idx;
 int row=cpiotable->currentRow();
 
@@ -344,20 +344,20 @@ cpiotable->setCurrentCell(row,0);
 //*********************************************************************
 void cpioedit::extract_file() {
 
-FILE* out;  
+FILE* out;
 cpfiledir* fd;
 
 fd=selected_file();
 
 if (((fd->fmode()) & C_ISREG) == 0) {
   // нерегулярный файл - его извлекать нельзя
-	QMessageBox::critical(0, "Error", "Irregular files can not be extracted");  
+	QMessageBox::critical(0, "Error", "Irregular files can not be extracted");
 	return;
 }
 
 QString fn=fd->cfname();
 
-fn = QFileDialog::getSaveFileName(this, "Save file", fn, "All files (*)"); 
+fn = QFileDialog::getSaveFileName(this, "Save file", fn, "All files (*)");
 if (fn.isEmpty()) return;
 out=fopen(fn.toLocal8Bit().data(),"w");
 fwrite(fd->fdata(),1,fd->fsize(),out);
@@ -381,7 +381,7 @@ if (((fd->fmode()) & C_ISREG) == 0) {
 	return;
 }
 
-fn = QFileDialog::getOpenFileName(this, "File Replacement", fn, "All files (*)"); 
+fn = QFileDialog::getOpenFileName(this, "File Replacement", fn, "All files (*)");
 if (fn.isEmpty()) return;
 
 QFile in(fn,this);
@@ -412,11 +412,11 @@ if (((fd->fmode()) & C_ISREG) == 0) {
 	return;
 }
 
-view=new viewer(0,0,readonly,fd->fname(),fd);  
+view=new viewer(0,0,readonly,fd->fname(),fd);
 // сигнал модификации
 connect(view,SIGNAL(changed()),this,SLOT(setModified()));
 
-}  
+}
 
 //*********************************************************************
 //* текстовый редактор
@@ -439,17 +439,17 @@ if (((fd->fmode()) & C_ISREG) == 0) {
 	return;
 }
 
-hview=new hexfileviewer(fd);  
+hview=new hexfileviewer(fd);
 
 // сигнал модификации
 connect(hview,SIGNAL(changed()),this,SLOT(setModified()));
-}  
+}
 
 //*********************************************************************
 //* Переход на уровень вверх
 //*********************************************************************
 void cpioedit::go_up() {
-  
+
 emit cpio_process_file(0,0);
 }
 
@@ -458,7 +458,7 @@ emit cpio_process_file(0,0);
 //* Récepteur сигнала выбора файла/каталога
 //*********************************************************************
 void cpioedit::cpio_process_file(int row, int col) {
-
+  (void) col; /* UNUSED ARGUMENT */
 QList<cpfiledir*>* subdir;
 if (row<0) return;
 
@@ -470,14 +470,14 @@ if (cpiotable != 0) { // не корневой каталог
   disconnect(cpiotable,0,this,0); // разъединяем все слоты
   cpio_hide_dir();
   cpio_show_dir(subdir,1);
-}  
+}
 }
 
 //*********************************************************************
 //* Перепаковка cpio-раздела обратно
 //*********************************************************************
 void cpioedit::repack_cpio() {
-  
+
 uint8_t* ndata=new uint8_t[fullsize(rootdir)+4096];
 uint32_t nlen=0;
 int i;
@@ -509,13 +509,13 @@ uint8_t filename[100];
 char str[10];
 
 // эмуляция заголовка cpio
-cpio_header_t hdr;    
+cpio_header_t hdr;
 // заполняем константы заголовка
 memset(&hdr,'0',sizeof(hdr));
 memcpy(hdr.c_magic,"070701",6);
 memcpy(hdr.c_mode,"000081B4",8);
 
-fn = QFileDialog::getOpenFileName(this, "Add a new file", fn, "All files (*)"); 
+fn = QFileDialog::getOpenFileName(this, "Add a new file", fn, "All files (*)");
 if (fn.isEmpty()) return;
 
 QFile in(fn,this);
@@ -554,7 +554,7 @@ sprintf(str,"%08x",fn.size()+1); // длина имени файла
 memcpy(hdr.c_namesize,str,8);
 memcpy(filename,fn.toLocal8Bit().data(),fn.size()+1); // имя файла
 // размер файла
-sprintf(str,"%08x",fsize); 
+sprintf(str,"%08x",fsize);
 memcpy(hdr.c_filesize,str,8);
 
 // файл больше не нужен
@@ -570,4 +570,3 @@ cpio_hide_dir();
 cpio_show_dir(currentdir,true);
 
 }
-

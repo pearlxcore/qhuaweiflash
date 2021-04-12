@@ -1,6 +1,6 @@
-// 
+//
 //  cpfiledir - класс для хранения списка файлов, составляющих cpio-архив
-// 
+//
 #include <QtCore/QVariant>
 #include <QtWidgets>
 
@@ -15,7 +15,7 @@
 //* Конструктор класса хранилища файлов - добавление из cpio-потока
 //********************************************************************
 cpfiledir::cpfiledir(uint8_t* iptr) {
-  
+
 phdr=new cpio_header_t;
 
 memcpy(phdr,iptr,sizeof(cpio_header_t)); // копируем себе заголовок
@@ -51,7 +51,7 @@ memcpy(filename,fname,nsz);
 if (fsz != 0) fimage=new char[fsz];
 memcpy(fimage,data,fsz);
 }
-    
+
 
 //******************************************************
 //* Деструктор класса хранилища файлов
@@ -63,7 +63,7 @@ if ((subdir != 0) && !updirflag) {  // если это не ссылка на р
     qDeleteAll(*subdir);
     subdir->clear();
     delete subdir;
-}  
+}
 
 delete [] filename;
 if (fimage != 0) delete [] fimage;
@@ -75,7 +75,7 @@ delete phdr;
 //* Установка нового имени файла
 //*******************************************************
 void cpfiledir::setfname (char* name) {
-  
+
 int len;
 
 delete [] filename;
@@ -83,14 +83,14 @@ len=strlen(name)+1;
 filename=new char[len];
 strcpy(filename,name);
 setfsize(len);
-  
+
 }
 
 //*******************************************************
 //* Получение размера файла
 //*******************************************************
  uint32_t cpfiledir:: fsize() {
-  
+
 uint32_t val;
 char vstr[9];
 bzero(vstr,9);
@@ -103,10 +103,10 @@ return val;
 //* Установка размера файла
 //*******************************************************
 void cpfiledir::setfsize(int size) {
-  
-char str[10];  
 
-sprintf(str,"%08x",size);  
+char str[10];
+
+sprintf(str,"%08x",size);
 memcpy(phdr->c_filesize,str,8);
 
 }
@@ -117,7 +117,7 @@ memcpy(phdr->c_filesize,str,8);
 //* Получение округленной длины имени файла
 //*******************************************************
 uint32_t cpfiledir:: nsize() {
-  
+
 uint32_t val;
 char vstr[9];
 
@@ -133,7 +133,7 @@ return val-sizeof(cpio_header_t);
 //* Получение чистого имени файла без предшествующего пути
 //**********************************************************
 char* cpfiledir::cfname() {
-  
+
 char* ptr;
 
 ptr=strrchr(filename,'/');
@@ -145,7 +145,7 @@ else return ptr+1;
 //* Получение времени создания файла
 //*******************************************************
 uint32_t cpfiledir::ftime() {
-  
+
 uint32_t val;
 char vstr[9];
 
@@ -160,7 +160,7 @@ return val;
 //* Получение атрибутов файла
 //*******************************************************
 uint32_t cpfiledir::fmode() {
-  
+
 uint32_t val;
 char vstr[9];
 
@@ -174,7 +174,7 @@ return val;
 //* Получение группы файла
 //*******************************************************
 uint32_t cpfiledir::fgid() {
-  
+
 uint32_t val;
 char vstr[9];
 
@@ -188,7 +188,7 @@ return val;
 //* Получение владельца файла
 //*******************************************************
 uint32_t cpfiledir::fuid() {
-  
+
 uint32_t val;
 char vstr[9];
 
@@ -263,10 +263,10 @@ memcpy(fimage,pdata,len);
 
 setfsize(len);
 }
-  
-  
+
+
 //##############################################################################################################################################
-  
+
 //*******************************************************
 //* Выделение имени файла из заголовка cpio-архива
 //*******************************************************
@@ -279,7 +279,7 @@ strcpy(filename,(char*)(iptr+sizeof(cpio_header_t)));
 //* Поиск подкаталога по имени
 //*******************************************************
 QList<cpfiledir*>* find_dir(char* name, QList<cpfiledir*>* updir) {
-  
+
 int i;
 char* fn;
 for (i=0;i<updir->size();i++) {
@@ -302,8 +302,8 @@ for (i=0;i<dir->size();i++) {
 }
 return -1;
 }
-  
-  
+
+
 //*******************************************************
 //* Определение наличия cpio-потока
 //*******************************************************
@@ -311,9 +311,9 @@ int is_cpio(uint8_t* ptr) {
 
 if (strncmp((char*)ptr,"070701",6) == 0) {
   return 1;
-}  
+}
 else {
-  return 0;	
+  return 0;
 }
 }
 
@@ -327,23 +327,23 @@ else {
 //*******************************************************
 uint32_t cpio_load_file(uint8_t* iptr, QList<cpfiledir*>* dir, int plen, char* fname) {
 
-char* dfname=(char*)"..";  
+char* dfname=(char*)"..";
 QString str;
 // класс, куда загружаются описатели данного файла
 cpfiledir* fd;
 char filename[256]; // буфер для копии имени файла
 char* slptr;
 QList<cpfiledir*>* fdir; // подкаталог для поиска остатка имени файла
-strncpy(filename,fname,256);      
+strncpy(filename,fname,255);
 
 // Корневой каталог
 if ((strlen(filename) == 1) && (filename[1] != '.')) {
   fd=new cpfiledir(iptr);
-  fd->subdir=0; // нет подкаталога  
+  fd->subdir=0; // нет подкаталога
   dir->append(fd);
   return fd->totalsize();
 }
-// Проверяем наличие пути к файлу      
+// Проверяем наличие пути к файлу
 slptr=strchr(filename,'/');
 
 if (slptr != 0) {
@@ -352,13 +352,13 @@ if (slptr != 0) {
   slptr++;  // теперь slptr показывает на остаток имени файла
   fdir=find_dir(filename, dir); // ищем подкаталог в текущем каталоге
   if (fdir == 0) {
-    str.sprintf("A file without a directory was found in the feed -% s",fname);
+    str.sprintf("A file without a directory was found in the feed -%s",fname);
     QMessageBox::critical(0,"Error CPIO",str);
     return 0; // не нашли - une erreur структуры, файл без каталога
   }
-// загружаем файл в вектор подкаталога   
+// загружаем файл в вектор подкаталога
   return cpio_load_file(iptr,fdir,plen,slptr);
-}  
+}
 // Это - настоящее конечное имя файла
 // для каталога создаем вектор-подкаталог
 fd=new cpfiledir(iptr);
@@ -373,7 +373,7 @@ if ((fd->fmode()&C_ISDIR) != 0) {
    upfd->updirflag=true;  // признак ссылки на каталог верхнего уровня
    // добавляем эту запись первой в вектор подкаталога
    fd->subdir->append(upfd);
-}  
+}
 dir->append(fd);
 return fd->totalsize();
 }
@@ -382,13 +382,12 @@ return fd->totalsize();
 //* Подсчет полного размера загруженного архива
 //*******************************************************
 uint32_t fullsize(QList<cpfiledir*>* root) {
-  
+
 uint32_t sum=0;
 int i;
 
 for(i=0;i<root->count();i++) {
   sum+=root->at(i)->treesize();
-}  
+}
 return sum;
 }
-

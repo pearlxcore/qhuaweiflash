@@ -9,7 +9,7 @@
 //********************************************************************
 kerneledit::kerneledit(int xpnum, QWidget* parent) : QWidget(parent) {
 
-QString str;  
+QString str;
 char cline[513];
 QFont font;
 QFont oldfont;
@@ -33,7 +33,7 @@ hdr=(struct boot_img_hdr*)(localdata+128);
 // Вертикальный компоновщик
 vlm=new QVBoxLayout(this);
 
-// Вынимаем текущие параметры шрифта меток 
+// Вынимаем текущие параметры шрифта меток
 font=QApplication::font("QLabel");
 oldfont=font;
 
@@ -196,11 +196,11 @@ kerneledit::~kerneledit() {
 QMessageBox::StandardButton reply;
 QString cmd;
 
-// проверяем редактор командной строки 
+// проверяем редактор командной строки
 if (cmdline->isModified()) {
   cmd=cmdline->text();
-  strncpy((char*)hdr->cmdline,cmd.toLocal8Bit().data(),BOOT_ARGS_SIZE);
-}  
+  strncpy((char*)hdr->cmdline,cmd.toLocal8Bit().data(),BOOT_ARGS_SIZE - 1);
+}
 
 // проверяем, изменились ли данные
 if ((ptable->psize(pnum) != (plen+128)) || (memcmp(localdata,ptable->iptr(pnum),plen+128) != 0)) {
@@ -208,8 +208,8 @@ if ((ptable->psize(pnum) != (plen+128)) || (memcmp(localdata,ptable->iptr(pnum),
   if (reply == QMessageBox::Ok) {
     ptable->replace(pnum,localdata,plen+128);
   }
-}  
-delete localdata;  
+}
+delete localdata;
 }
 
 //********************************************************************
@@ -231,13 +231,13 @@ switch(type) {
     size=hdr->kernel_size;
     if (filename != 0) *filename="vmlinuz.bin";
     break;
-    
+
   case 1:
     start=kernelsize+1;
     size=hdr->ramdisk_size;
     if (filename != 0) *filename="ramdisk1.cpio.gz";
     break;
-    
+
   case 2:
     start=kernelsize+ram1size+1;
     size=hdr->second_size;
@@ -350,7 +350,7 @@ if (type == 0) {
   srcptr+=kernelsize;
   dstptr+=bound_filesize;
   hdr->kernel_size=fsize;
-}  
+}
 else {
   memcpy(dstptr,srcptr,kernelsize);
   srcptr+=kernelsize;
@@ -363,8 +363,8 @@ if (type == 1) {
   srcptr+=r1size;
   dstptr+=bound_filesize;
   hdr->ramdisk_size=fsize;
-  
-}  
+
+}
 else {
   memcpy(dstptr,srcptr,r1size);
   srcptr+=r1size;
@@ -377,7 +377,7 @@ if (type == 2) {
   srcptr+=r2size;
   dstptr+=bound_filesize;
   hdr->second_size=fsize;
-}  
+}
 else {
   memcpy(dstptr,srcptr,r2size);
   srcptr+=r2size;

@@ -20,7 +20,7 @@ int i;
 for (i=0;i<(int)nvhd.file_num;i++) {
   if (flist[i].id == (uint32_t)fid) return flist[i].offset;
 }
-printf("\ n - File structure error - #% i components do not exist \ n",fid);
+printf("\n - File structure error - #%i components do not exist \n",fid);
 exit(1);
 }
 
@@ -52,7 +52,7 @@ return itemlist[idx].off+fileoff(itemlist[idx].file_id);
 //*  возврат -1 - ячейка не найдена
 //******************************************************
 int32_t nvexplorer::itemidx(int item) {
-  
+
 int i;
 
 for(i=0;i<(int)nvhd.item_count;i++) {
@@ -86,7 +86,7 @@ return itemlist[idx].len;
 //*  Поиск минимального из 2 чисед
 //**********************************************
 int min(int a, int b) {
-  
+
 if (a<b) return a;
 else return b;
 }
@@ -95,7 +95,7 @@ else return b;
 //* Chargement ячейки в буфер
 //**********************************************
 int nvexplorer::load_item(int item, char* buf) {
-  
+
 int idx=itemidx(item);
 int len=itemlist[idx].len;
 
@@ -103,4 +103,3 @@ if (idx == -1) return -1; // не найдена
 memcpy(buf,pdata+itemoff_idx(idx),len);
 return len;
 }
-

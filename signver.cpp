@@ -1,7 +1,7 @@
 #include <QtWidgets>
 
 // Процедуры обработки цифровых подписей
-// 
+//
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -42,25 +42,25 @@ char signver_hash[100]="778A8D175E602B7B779D9E05C330B5279B0661BF2EED99A20445B366
 
 
 
-  
+
 
 //***************************************************
 //* Отправка цифровой подписи
 //***************************************************
 int32_t send_signver() {
-  
+
 uint32_t res;
 // ответ на ^signver
 unsigned char SVrsp[]={0x0d, 0x0a, 0x30, 0x0d, 0x0a, 0x0d, 0x0a, 0x4f, 0x4b, 0x0d, 0x0a};
 uint8_t replybuf[200];
-char message[100];  
+char message[100];
 
 signtype=dload_id&0x7;
 
 sprintf((char*)signver,"^SIGNVER=%i,0,%s,%i",signtype,signver_hash,signlen);
 res=atcmd((char*)signver,replybuf);
 if ( (res<sizeof(SVrsp)) || (memcmp(replybuf,SVrsp,sizeof(SVrsp)) != 0) ) {
-   sprintf(message, "Error while checking digital signature -% 02x",replybuf[2]);
+   sprintf(message, "Error while checking digital signature -%02x",replybuf[2]);
    QMessageBox::critical(0,"Erreur",message);
    return -2;
 }
@@ -81,7 +81,7 @@ for (i=0;i<2;i++) {
   if (ptable->index() == i) break;
   imageptr=ptable->iptr(i)+ptable->psize(i);
   pt=*(uint32_t*)(imageptr-4);
-  if (pt == 0xffaaaffa) { 
+  if (pt == 0xffaaaffa) {
     // подпись найдена
     signlen=*(uint32_t*)(imageptr-12);
     bzero(signver_hash,100);
@@ -97,7 +97,7 @@ for (i=0;i<2;i++) {
 // не найдена
 return -1;
 }
- 
+
 //********************************************
 //* Вывод информации о цифровой подписи
 //********************************************
@@ -129,7 +129,7 @@ sd->exec();
 delete btn;
 delete dlid;
 delete hash;
-delete signln; 
+delete signln;
 delete lm;
 delete sd;
 }

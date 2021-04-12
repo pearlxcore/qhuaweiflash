@@ -60,7 +60,7 @@ for (i=0;i<len;i+=16) {
 
 
 //*************************************************
-//*  Вычисление CRC-16 
+//*  Вычисление CRC-16
 //*************************************************
 unsigned short crc16(uint8_t* buf, int len) {
 
@@ -99,9 +99,9 @@ unsigned short crctab[] = {
     0x7bc7, 0x6a4e, 0x58d5, 0x495c, 0x3de3, 0x2c6a, 0x1ef1, 0x0f78
 };
 int i;
-unsigned short crc=0xffff;  
+unsigned short crc=0xffff;
 
-for(i=0;i<len;i++)  crc=crctab[(buf[i]^crc)&0xff]^((crc>>8)&0xff);  
+for(i=0;i<len;i++)  crc=crctab[(buf[i]^crc)&0xff]^((crc>>8)&0xff);
 return (~crc)&0xffff;
 }
 
@@ -113,9 +113,9 @@ unsigned int send_unframed_buf(uint8_t* outcmdbuf, unsigned int outlen) {
 
 
 tcflush(siofd,TCIOFLUSH);  // сбрасываем недочитанный буфер ввода
-if (write(siofd,"\x7e",1)  == 0) { printf("\ n Error writing command prefix");return 0; } // отсылаем префикс
+if (write(siofd,"\x7e",1)  == 0) { printf("\n Error writing command prefix");return 0; } // отсылаем префикс
 
-if (write(siofd,outcmdbuf,outlen) == 0) {   printf("\ n command write error");return 0;  }
+if (write(siofd,outcmdbuf,outlen) == 0) {   printf("\n command write error");return 0;  }
 tcdrain(siofd);  // ждем окончания вывода блока
 return 1;
 }
@@ -127,7 +127,7 @@ return 1;
 //******************************************************************************************
 
 unsigned int receive_reply(uint8_t* iobuf, int masslen) {
-  
+
 int i,iolen,escflag,incount;
 unsigned char c;
 int res;
@@ -148,10 +148,10 @@ replybuf[incount++]=c;
 if (masslen != 0) {
  res=read(siofd,replybuf+1,masslen-1);
  if (res != (masslen-1)) {
-   printf("\ nThe modem response is too short:% i bytes,% i bytes expected\ n",res+1,masslen);
+   printf("\nThe modem response is too short:% i bytes,% i bytes expected\n",res+1,masslen);
    dump(replybuf,res+1,0);
    return 0;
- }  
+ }
  incount+=masslen-1; // у нас в буфере уже есть masslen байт
 // printf("\n ------ it mass --------");
 // dump(replybuf,incount,0);
@@ -167,22 +167,22 @@ while (read(siofd,&c,1) == 1)  {
 // Преобразование принятого буфера для удаления ESC-знаков
 escflag=0;
 iolen=0;
-for (i=0;i<incount;i++) { 
+for (i=0;i<incount;i++) {
   c=replybuf[i];
   if ((c == 0x7e)&&(iolen != 0)) {
     iobuf[iolen++]=0x7e;
     break;
-  }  
+  }
   if (c == 0x7d) {
     escflag=1;
     continue;
   }
-  if (escflag == 1) { 
+  if (escflag == 1) {
     c|=0x20;
     escflag=0;
-  }  
+  }
   iobuf[iolen++]=c;
-}  
+}
 return iolen;
 
 }
@@ -210,12 +210,12 @@ for(i=1;i<bcnt;i++) {
        outcmdbuf[iolen++]=0x7d;
        outcmdbuf[iolen++]=0x5e;
        break;
-      
+
      case 0x7d:
        outcmdbuf[iolen++]=0x7d;
        outcmdbuf[iolen++]=0x5d;
        break;
-      
+
      default:
        outcmdbuf[iolen++]=cmdbuf[i];
    }
@@ -231,11 +231,11 @@ return iolen;
 //*  Отсылка команды в порт и получение результата  *
 //***************************************************
 int send_cmd(unsigned char* incmdbuf, int blen, unsigned char* iobuf) {
-  
+
 unsigned char outcmdbuf[14096];
 unsigned int  iolen;
 
-iolen=convert_cmdbuf(incmdbuf,blen,outcmdbuf);  
+iolen=convert_cmdbuf(incmdbuf,blen,outcmdbuf);
 if (!send_unframed_buf(outcmdbuf,iolen)) return 0; // une erreur передачи команды
 return receive_reply(iobuf,0);
 }
@@ -245,12 +245,12 @@ return receive_reply(iobuf,0);
 //**************************************************
 char* serial_port_name() {
 
-static char portname[200];  
+static char portname[200];
 
 strcpy(portname,"/dev/");
 strcat(portname,pselector->currentText().toLocal8Bit());
 return portname;
-  
+
 }
 
 //***************************************************
@@ -267,8 +267,8 @@ sioparm.c_cflag = B115200 | CS8 | CLOCAL | CREAD ;
 sioparm.c_iflag = 0;  // INPCK;
 sioparm.c_oflag = 0;
 sioparm.c_lflag = 0;
-sioparm.c_cc[VTIME]=30; // timeout  
-sioparm.c_cc[VMIN]=0;  
+sioparm.c_cc[VTIME]=30; // timeout
+sioparm.c_cc[VMIN]=0;
 tcsetattr(siofd, TCSANOW, &sioparm);
 return 1;
 }
@@ -277,7 +277,7 @@ return 1;
 //* Закрытие последовательного порта
 //***************************************************
 void close_port() {
-  
+
 if (siofd != 0) close(siofd);
 siofd=0;
 }
@@ -293,14 +293,14 @@ sioparm.c_cflag = B115200 | CS8 | CLOCAL | CREAD ;
 sioparm.c_iflag = 0;  // INPCK;
 sioparm.c_oflag = 0;
 sioparm.c_lflag = 0;
-sioparm.c_cc[VTIME]=timeout; // timeout  
-sioparm.c_cc[VMIN]=0;  
+sioparm.c_cc[VTIME]=timeout; // timeout
+sioparm.c_cc[VMIN]=0;
 tcsetattr(siofd, TCSANOW, &sioparm);
 }
 
 //****************************************************
 //*  Отсылка модему АТ-команды
-//*  
+//*
 //* cmd - буфер с командой
 //* rbuf - буфер для записи ответа
 //*
@@ -327,7 +327,7 @@ usleep(100000);
 res=read(siofd,rbuf,200);
 return res;
 }
-  
+
 
 //*************************************************
 //* Redémarrer le modem
@@ -337,7 +337,7 @@ void modem_reboot() {
 uint8_t replybuf[1024];
 uint8_t cmd=0x0a;
 
-send_cmd(&cmd,1,replybuf); // HDLC-команда перезагрузки 
+send_cmd(&cmd,1,replybuf); // HDLC-команда перезагрузки
 atcmd("^RESET",replybuf);    // АТ-команда перезагрузки
 }
 
@@ -348,6 +348,6 @@ void end_hdlc() {
 
 uint8_t replybuf[1024];
 uint8_t cmd=0x01;
-  
-send_cmd(&cmd,1,replybuf); // HDLC-команда перезагрузки 
-}	  
+
+send_cmd(&cmd,1,replybuf); // HDLC-команда перезагрузки
+}
